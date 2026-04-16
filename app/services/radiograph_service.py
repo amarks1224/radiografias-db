@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from app.services.cloudinary_service import CloudinaryService
 
 from app.repositories.patient_repository import PatientRepository
 from app.repositories.radiograph_repository import RadiographRepository
@@ -76,6 +77,25 @@ class RadiographService:
                 )
 
         return self.repository.update(db, radiograph, radiograph_data)
+    
+    def upload_radiograph_image(self, db: Session, radiograph_id: int, file_path: str):
+        radiograph = self.repository.get_by_id(db, radiograph_id)
+        if not radiograph:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Radiografía no encontrada"
+            )
+
+        upload_result = self.cloudinary_service.upload_image(file_path)
+        image_url = upload_result["secure_url"]
+        
+        updated_radiograph = self.repository.update_image_url(db, radiograph, image_url)
+
+        return {
+            "message": "Imagen subida correctamente",
+            "radiograph_id": updated_radiograph.id,
+            "image_url": updated_radiograph.image_url
+        }
 
     def delete_radiograph(self, db: Session, radiograph_id: int):
         radiograph = self.repository.get_by_id(db, radiograph_id)

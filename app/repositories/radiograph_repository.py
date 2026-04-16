@@ -41,6 +41,12 @@ class RadiographRepository:
         db.commit()
         db.refresh(radiograph)
         return radiograph
+    
+    def update_image_url(self, db: Session, radiograph: Radiograph, image_url: str) -> Radiograph:
+        radiograph.image_url = image_url
+        db.commit()
+        db.refresh(radiograph)
+        return radiograph
 
     def delete(self, db: Session, radiograph: Radiograph) -> None:
         db.delete(radiograph)
