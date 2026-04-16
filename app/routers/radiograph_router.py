@@ -41,15 +41,6 @@ def create_radiograph(
 ):
     return radiograph_service.create_radiograph(db, radiograph_data)
 
-
-@router.put("/{radiograph_id}", response_model=RadiographResponse)
-def update_radiograph(
-    radiograph_id: int,
-    radiograph_data: RadiographUpdate,
-    db: Session = Depends(get_db)
-):
-    return radiograph_service.update_radiograph(db, radiograph_id, radiograph_data)
-
 @router.post("/{radiograph_id}/upload-image", response_model=RadiographImageUploadResponse)
 def upload_radiograph_image(
     radiograph_id: int,
@@ -57,11 +48,22 @@ def upload_radiograph_image(
     db: Session = Depends(get_db)
 ):
     allowed_types = {"image/jpeg", "image/png", "image/webp"}
+    max_size = 5 * 1024 * 1024
 
     if file.content_type not in allowed_types:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Tipo de archivo no permitido"
+        )
+
+    file.file.seek(0, os.SEEK_END)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    if file_size > max_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El archivo excede el tamaño máximo permitido de 5 MB"
         )
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
@@ -73,6 +75,14 @@ def upload_radiograph_image(
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+@router.put("/{radiograph_id}", response_model=RadiographResponse)
+def update_radiograph(
+    radiograph_id: int,
+    radiograph_data: RadiographUpdate,
+    db: Session = Depends(get_db)
+):
+    return radiograph_service.update_radiograph(db, radiograph_id, radiograph_data)
 
 @router.delete("/{radiograph_id}")
 def delete_radiograph(radiograph_id: int, db: Session = Depends(get_db)):
