@@ -1,11 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from app.services.cloudinary_service import CloudinaryService
 
 from app.repositories.patient_repository import PatientRepository
 from app.repositories.radiograph_repository import RadiographRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.radiograph import RadiographCreate, RadiographUpdate
+from app.services.cloudinary_service import CloudinaryService
 
 
 class RadiographService:
@@ -13,6 +13,7 @@ class RadiographService:
         self.repository = RadiographRepository()
         self.patient_repository = PatientRepository()
         self.user_repository = UserRepository()
+        self.cloudinary_service = CloudinaryService()
 
     def get_all_radiographs(self, db: Session):
         return self.repository.get_all(db)
@@ -77,7 +78,7 @@ class RadiographService:
                 )
 
         return self.repository.update(db, radiograph, radiograph_data)
-    
+
     def upload_radiograph_image(self, db: Session, radiograph_id: int, file_path: str):
         radiograph = self.repository.get_by_id(db, radiograph_id)
         if not radiograph:
@@ -88,7 +89,7 @@ class RadiographService:
 
         upload_result = self.cloudinary_service.upload_image(file_path)
         image_url = upload_result["secure_url"]
-        
+
         updated_radiograph = self.repository.update_image_url(db, radiograph, image_url)
 
         return {

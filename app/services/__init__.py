@@ -1,1 +1,0 @@
-self.cloudinary_service = CloudinaryService()
