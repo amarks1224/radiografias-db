@@ -25,8 +25,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Verificar importacion de la app
-      env:
+        env:
           CLOUDINARY_CLOUD_NAME: test
           CLOUDINARY_API_KEY: test
           CLOUDINARY_API_SECRET: test
-      run: python -c "from app.main import app; print('OK')"
+        run: python -c "from app.main import app; print('OK')"
