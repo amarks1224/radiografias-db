@@ -1,0 +1,32 @@
+name: CI - Basico
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verificar importacion de la app
+      env:
+          CLOUDINARY_CLOUD_NAME: test
+          CLOUDINARY_API_KEY: test
+          CLOUDINARY_API_SECRET: test
+      run: python -c "from app.main import app; print('OK')"
