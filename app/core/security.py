@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from jwt import PyJWTError
 
 from app.core.config import settings
-
+import jwt
 
 def create_access_token(data: dict, expires_minutes: Optional[int] = None) -> str:
     to_encode = data.copy()
