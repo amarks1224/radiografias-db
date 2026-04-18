@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-import jwt
 from fastapi import HTTPException, status
 from jwt import PyJWTError
 
