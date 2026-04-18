@@ -29,4 +29,8 @@ jobs:
           CLOUDINARY_CLOUD_NAME: test
           CLOUDINARY_API_KEY: test
           CLOUDINARY_API_SECRET: test
+          GOOGLE_CLIENT_ID: test.apps.googleusercontent.com
+          JWT_SECRET_KEY: test_jwt_secret_key
+          JWT_ALGORITHM: HS256
+          JWT_EXPIRE_MINUTES: 60
         run: python -c "from app.main import app; print('OK')"
