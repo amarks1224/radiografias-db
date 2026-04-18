@@ -32,4 +32,4 @@ class RadiographResponse(RadiographBase):
 class RadiographImageUploadResponse(BaseModel):
     message: str
     radiograph_id: int
-    image_url: str
+    public_id: str

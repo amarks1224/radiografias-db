@@ -88,14 +88,14 @@ class RadiographService:
             )
 
         upload_result = self.cloudinary_service.upload_image(file_path)
-        image_url = upload_result["secure_url"]
+        image_public_id = upload_result["public_id"]
 
-        updated_radiograph = self.repository.update_image_url(db, radiograph, image_url)
+        updated_radiograph = self.repository.update_image_url(db, radiograph, image_public_id)
 
         return {
-            "message": "Imagen subida correctamente",
+            "message": "Imagen subida correctamente como recurso protegido",
             "radiograph_id": updated_radiograph.id,
-            "image_url": updated_radiograph.image_url
+            "public_id": updated_radiograph.image_url
         }
 
     def delete_radiograph(self, db: Session, radiograph_id: int):

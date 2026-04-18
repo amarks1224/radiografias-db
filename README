@@ -12,3 +12,6 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 6. Abrir documentación Swagger
 http://127.0.0.1:8000/docs
+
+
+Para incorporar la funcionalidad de protección de imágenes de la Parte 2, se modificaron principalmente los archivos app/services/cloudinary_service.py, app/services/radiograph_service.py y app/schemas/radiograph.py. En cloudinary_service.py se ajustó la subida de imágenes para que se almacenen en Cloudinary como recursos protegidos (authenticated) y se añadió la lógica base para generar URLs firmadas. En radiograph_service.py se cambió el flujo de carga para guardar el public_id de Cloudinary en lugar de una URL pública fija, dejando preparada la integración para el acceso temporal y restringido. Finalmente, en radiograph.py se actualizó el esquema de respuesta del endpoint de subida de imágenes para reflejar el uso de public_id en vez de image_url.
