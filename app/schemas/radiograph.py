@@ -33,3 +33,8 @@ class RadiographImageUploadResponse(BaseModel):
     message: str
     radiograph_id: int
     public_id: str
+
+class RadiographSignedUrlResponse(BaseModel):
+    radiograph_id: int
+    signed_url: str
+    expires_in_minutes: int

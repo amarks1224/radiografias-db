@@ -1,7 +1,9 @@
 import cloudinary
 import cloudinary.uploader
+import requests
 from cloudinary.utils import cloudinary_url
 from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 from app.core.config import settings
 
@@ -41,3 +43,30 @@ class CloudinaryService:
             secure=True
         )
         return url
+    
+    def build_protected_image_url(self, public_id: str) -> str:
+        url, _ = cloudinary_url(
+            public_id,
+            resource_type="image",
+            type="authenticated",
+            sign_url=True,
+            secure=True
+        )
+        return url
+
+
+def download_protected_image(self, public_id: str) -> dict:
+    image_url = self.build_protected_image_url(public_id)
+
+    response = requests.get(image_url, timeout=30)
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="No se pudo obtener la imagen protegida"
+        )
+
+    return {
+        "content": response.content,
+        "content_type": response.headers.get("Content-Type", "image/jpeg")
+    }

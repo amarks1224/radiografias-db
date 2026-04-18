@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Query
 
 from app.db.session import get_db
 from app.schemas.radiograph import (
@@ -14,6 +14,7 @@ from app.schemas.radiograph import (
     RadiographResponse,
     RadiographUpdate,
     RadiographImageUploadResponse,
+    RadiographSignedUrlResponse,
 )
 from app.services.radiograph_service import RadiographService
 
@@ -91,6 +92,26 @@ def upload_radiograph_image(
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+@router.post("/{radiograph_id}/signed-url", response_model=RadiographSignedUrlResponse)
+def generate_radiograph_signed_url(
+    radiograph_id: int,
+    expires_minutes: int | None = Query(default=None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if expires_minutes is not None and expires_minutes not in [5, 10]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El tiempo de expiración debe ser 5 o 10 minutos"
+        )
+
+    return radiograph_service.generate_signed_image_url(
+        db=db,
+        radiograph_id=radiograph_id,
+        current_user_id=current_user.id,
+        expires_minutes=expires_minutes
+    )
 
 @router.put("/{radiograph_id}", response_model=RadiographResponse)
 def update_radiograph(

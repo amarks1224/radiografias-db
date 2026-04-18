@@ -1,6 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+from app.core.security import create_signed_radiograph_token
 from app.repositories.patient_repository import PatientRepository
 from app.repositories.radiograph_repository import RadiographRepository
 from app.repositories.user_repository import UserRepository
@@ -108,3 +110,42 @@ class RadiographService:
 
         self.repository.delete(db, radiograph)
         return {"message": "Radiografía eliminada correctamente"}
+    
+    def generate_signed_image_url(
+        self,
+        db: Session,
+        radiograph_id: int,
+        current_user_id: int,
+        expires_minutes: int | None = None
+    ):
+        radiograph = self.repository.get_by_id(db, radiograph_id)
+        if not radiograph:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Radiografía no encontrada"
+            )
+
+        if radiograph.user_id != current_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes acceso a esta radiografía"
+            )
+
+        minutes = expires_minutes or settings.signed_url_expire_minutes
+
+        token = create_signed_radiograph_token(
+            user_id=current_user_id,
+            radiograph_id=radiograph_id,
+            expires_minutes=minutes
+        )
+
+        signed_url = (
+            f"{settings.api_base_url}/radiographs/"
+            f"{radiograph_id}/private-image?token={token}"
+        )
+
+        return {
+            "radiograph_id": radiograph_id,
+            "signed_url": signed_url,
+            "expires_in_minutes": minutes
+        }
