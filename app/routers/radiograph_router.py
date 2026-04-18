@@ -33,7 +33,7 @@ def get_all_radiographs(
 @router.get("/patient/{patient_id}", response_model=list[RadiographResponse])
 def get_radiographs_by_patient_id(
     patient_id: int, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
     ):
     return radiograph_service.get_radiographs_by_patient_id(db, patient_id)
@@ -42,7 +42,7 @@ def get_radiographs_by_patient_id(
 @router.get("/{radiograph_id}", response_model=RadiographResponse)
 def get_radiograph_by_id(
     radiograph_id: int, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
     ):
     return radiograph_service.get_radiograph_by_id(db, radiograph_id)
