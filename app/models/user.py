@@ -12,5 +12,8 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    
+    google_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

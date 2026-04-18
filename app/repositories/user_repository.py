@@ -14,6 +14,10 @@ class UserRepository:
     def get_by_email(self, db: Session, email: str) -> User | None:
         return db.query(User).filter(User.email == email).first()
 
+    def get_by_google_sub(self, db: Session, google_sub: str) -> User | None:
+        return db.query(User).filter(User.google_sub == google_sub).first()
+
+
     def create(self, db: Session, user_data: UserCreate) -> User:
         user = User(
             first_name=user_data.first_name,
@@ -38,3 +42,42 @@ class UserRepository:
     def delete(self, db: Session, user: User) -> None:
         db.delete(user)
         db.commit()
+
+    def create_google_user(
+        self,
+        db: Session,
+        first_name: str,
+        last_name: str,
+        email: str,
+        google_sub: str
+    ) -> User:
+        user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            google_sub=google_sub
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    
+    def update_google_user(
+        self,
+        db: Session,
+        user: User,
+        first_name: str,
+        last_name: str,
+        email: str,
+        google_sub: str
+    ) -> User:
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.google_sub = google_sub
+        user.updated_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(user)
+        return user
+    
