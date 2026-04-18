@@ -1,5 +1,9 @@
 import os
 import tempfile
+
+from app.core.dependencies import get_current_user
+from app.models.user import User
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -20,24 +24,36 @@ radiograph_service = RadiographService()
 
 
 @router.get("/", response_model=list[RadiographResponse])
-def get_all_radiographs(db: Session = Depends(get_db)):
+def get_all_radiographs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)   
+):
     return radiograph_service.get_all_radiographs(db)
 
 
 @router.get("/patient/{patient_id}", response_model=list[RadiographResponse])
-def get_radiographs_by_patient_id(patient_id: int, db: Session = Depends(get_db)):
+def get_radiographs_by_patient_id(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)    
+):
     return radiograph_service.get_radiographs_by_patient_id(db, patient_id)
 
 
 @router.get("/{radiograph_id}", response_model=RadiographResponse)
-def get_radiograph_by_id(radiograph_id: int, db: Session = Depends(get_db)):
+def get_radiograph_by_id(
+    radiograph_id: int, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)    
+):
     return radiograph_service.get_radiograph_by_id(db, radiograph_id)
 
 
 @router.post("/", response_model=RadiographResponse, status_code=201)
 def create_radiograph(
     radiograph_data: RadiographCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return radiograph_service.create_radiograph(db, radiograph_data)
 
@@ -45,7 +61,8 @@ def create_radiograph(
 def upload_radiograph_image(
     radiograph_id: int,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     allowed_types = {"image/jpeg", "image/png", "image/webp"}
     max_size = 5 * 1024 * 1024
@@ -80,10 +97,15 @@ def upload_radiograph_image(
 def update_radiograph(
     radiograph_id: int,
     radiograph_data: RadiographUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return radiograph_service.update_radiograph(db, radiograph_id, radiograph_data)
 
 @router.delete("/{radiograph_id}")
-def delete_radiograph(radiograph_id: int, db: Session = Depends(get_db)):
+def delete_radiograph(
+    radiograph_id: int, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     return radiograph_service.delete_radiograph(db, radiograph_id)
