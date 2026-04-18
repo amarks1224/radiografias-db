@@ -24,7 +24,7 @@ radiograph_service = RadiographService()
 
 @router.get("/", response_model=list[RadiographResponse])
 def get_all_radiographs(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
     ):
     return radiograph_service.get_all_radiographs(db)
