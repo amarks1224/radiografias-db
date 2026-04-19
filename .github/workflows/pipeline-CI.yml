@@ -30,7 +30,10 @@ jobs:
           CLOUDINARY_API_KEY: test
           CLOUDINARY_API_SECRET: test
           GOOGLE_CLIENT_ID: test.apps.googleusercontent.com
+          GOOGLE_CLIENT_SECRET: test_google_client_secret
           JWT_SECRET_KEY: test_jwt_secret_key
           JWT_ALGORITHM: HS256
           JWT_EXPIRE_MINUTES: 60
+          DATABASE_URL: sqlite:///./radiografias.db
+          SIGNED_URL_SECRET: test_signed_url_secret
         run: python -c "from app.main import app; print('OK')"
