@@ -8,6 +8,7 @@ from app.repositories.radiograph_repository import RadiographRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.radiograph import RadiographCreate, RadiographUpdate
 from app.services.cloudinary_service import CloudinaryService
+from app.core.security import decode_signed_radiograph_token
 
 
 class RadiographService:
@@ -125,6 +126,12 @@ class RadiographService:
                 detail="Radiografía no encontrada"
             )
 
+        if not radiograph.is_hidden:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La radiografía aún no está oculta"
+            )
+
         if radiograph.user_id != current_user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -145,7 +152,46 @@ class RadiographService:
         )
 
         return {
-            "radiograph_id": radiograph_id,
-            "signed_url": signed_url,
-            "expires_in_minutes": minutes
-        }
+        "radiograph_id": radiograph_id,
+        "signed_url": signed_url,
+        "token": token,
+        "expires_in_minutes": minutes
+    }
+
+    def get_private_image(
+        self,
+        db: Session,
+        radiograph_id: int,
+        token: str
+    ):
+        payload = decode_signed_radiograph_token(token)
+
+        token_radiograph_id = payload.get("radiograph_id")
+        token_user_id = int(payload.get("sub"))
+
+        if token_radiograph_id != radiograph_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="El token no corresponde a esta radiografía"
+            )
+
+        radiograph = self.repository.get_by_id(db, radiograph_id)
+        if not radiograph:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Radiografía no encontrada"
+            )
+
+        if radiograph.user_id != token_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="El token no corresponde al usuario autorizado"
+            )
+
+        if not radiograph.image_url:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="La radiografía no tiene imagen asociada"
+            )
+
+        return self.cloudinary_service.download_protected_image(radiograph.image_url)

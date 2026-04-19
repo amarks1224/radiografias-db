@@ -56,3 +56,4 @@ def delete_patient(
     current_user: User = Depends(get_current_user)
     ):
     return patient_service.delete_patient(db, patient_id)
+

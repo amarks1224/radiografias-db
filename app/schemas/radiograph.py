@@ -10,10 +10,8 @@ class RadiographBase(BaseModel):
     study_date: date
     image_url: str
 
-
 class RadiographCreate(RadiographBase):
     pass
-
 
 class RadiographUpdate(BaseModel):
     patient_id: int | None = None
@@ -21,7 +19,6 @@ class RadiographUpdate(BaseModel):
     clinical_reference: str | None = None
     study_date: date | None = None
     image_url: str | None = None
-
 
 class RadiographResponse(RadiographBase):
     id: int
@@ -37,4 +34,5 @@ class RadiographImageUploadResponse(BaseModel):
 class RadiographSignedUrlResponse(BaseModel):
     radiograph_id: int
     signed_url: str
+    token: str
     expires_in_minutes: int

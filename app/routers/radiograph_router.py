@@ -1,13 +1,12 @@
 import os
 import tempfile
-from fastapi import APIRouter, Depends
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Query
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
 from app.models.user import User
-
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Query
-
 from app.db.session import get_db
 from app.schemas.radiograph import (
     RadiographCreate,
@@ -129,3 +128,21 @@ def delete_radiograph(
     current_user: User = Depends(get_current_user)
     ):
     return radiograph_service.delete_radiograph(db, radiograph_id)
+
+@router.get("/{radiograph_id}/private-image")
+def get_private_radiograph_image(
+    radiograph_id: int,
+    token: str = Query(...),
+    db: Session = Depends(get_db)
+):
+    image_data = radiograph_service.get_private_image(
+        db=db,
+        radiograph_id=radiograph_id,
+        token=token
+    )
+
+    return Response(
+        content=image_data["content"],
+        media_type=image_data["content_type"],
+        headers={"Cache-Control": "no-store, private"}
+    )
