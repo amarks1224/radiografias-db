@@ -196,7 +196,18 @@ class RadiographService:
 
         return self.cloudinary_service.download_protected_image(radiograph.image_url)
 
-        def get_radiographs_filtered(self, db: Session, patient_id: int | None, is_hidden: bool | None, study_date_from, study_date_to, order_by: str, order_dir: str, page: int, page_size: int):
+    def get_radiographs_filtered(
+        self,
+        db: Session,
+        patient_id: int | None,
+        is_hidden: bool | None,
+        study_date_from,
+        study_date_to,
+        order_by: str,
+        order_dir: str,
+        page: int,
+        page_size: int
+    ):
         results, total = self.repository.get_filtered(
             db, patient_id, is_hidden, study_date_from, study_date_to,
             order_by, order_dir, page, page_size
