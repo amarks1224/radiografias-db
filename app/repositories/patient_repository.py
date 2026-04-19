@@ -38,3 +38,21 @@ class PatientRepository:
     def delete(self, db: Session, patient: Patient) -> None:
         db.delete(patient)
         db.commit()
+
+    def get_filtered(self, db: Session, name: str | None, code: str | None, order_by: str, order_dir: str, page: int, page_size: int) -> tuple[list[Patient], int]:
+        query = db.query(Patient)
+
+        if name:
+            query = query.filter(Patient.name.ilike(f"%{name}%"))
+        if code:
+            query = query.filter(Patient.code.ilike(f"%{code}%"))
+
+        column = getattr(Patient, order_by, Patient.id)
+        if order_dir == "desc":
+            query = query.order_by(column.desc())
+        else:
+            query = query.order_by(column.asc())
+
+        total = query.count()
+        results = query.offset((page - 1) * page_size).limit(page_size).all()
+        return results, total

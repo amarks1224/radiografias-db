@@ -51,3 +51,26 @@ class RadiographRepository:
     def delete(self, db: Session, radiograph: Radiograph) -> None:
         db.delete(radiograph)
         db.commit()
+
+    def get_filtered(self, db: Session, patient_id: int | None, is_hidden: bool | None, study_date_from: date | None, study_date_to: date | None, order_by: str, order_dir: str, page: int, page_size: int ) -> tuple[list[Radiograph], int]:
+        from datetime import date as date_type
+        query = db.query(Radiograph)
+
+        if patient_id is not None:
+            query = query.filter(Radiograph.patient_id == patient_id)
+        if is_hidden is not None:
+            query = query.filter(Radiograph.is_hidden == is_hidden)
+        if study_date_from is not None:
+            query = query.filter(Radiograph.study_date >= study_date_from)
+        if study_date_to is not None:
+            query = query.filter(Radiograph.study_date <= study_date_to)
+
+        column = getattr(Radiograph, order_by, Radiograph.id)
+        if order_dir == "desc":
+            query = query.order_by(column.desc())
+        else:
+            query = query.order_by(column.asc())
+
+        total = query.count()
+        results = query.offset((page - 1) * page_size).limit(page_size).all()
+        return results, total

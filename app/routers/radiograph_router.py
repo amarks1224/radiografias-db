@@ -14,6 +14,7 @@ from app.schemas.radiograph import (
     RadiographUpdate,
     RadiographImageUploadResponse,
     RadiographSignedUrlResponse,
+    RadiographListResponse
 )
 from app.services.radiograph_service import RadiographService
 
@@ -21,13 +22,39 @@ router = APIRouter(prefix="/radiographs", tags=["Radiographs"])
 
 radiograph_service = RadiographService()
 
-
+"""
 @router.get("/", response_model=list[RadiographResponse])
 def get_all_radiographs(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
     ):
     return radiograph_service.get_all_radiographs(db)
+"""
+
+from datetime import date
+
+@router.get("/", response_model=RadiographListResponse)
+def get_all_radiographs(
+    patient_id: int | None = Query(default=None, description="Filtrar por ID de paciente"),
+    is_hidden: bool | None = Query(default=None, description="Filtrar por estado oculto"),
+    study_date_from: date | None = Query(default=None, description="Desde fecha de estudio"),
+    study_date_to: date | None = Query(default=None, description="Hasta fecha de estudio"),
+    order_by: str = Query(default="id", description="Campo: id, study_date, created_at"),
+    order_dir: str = Query(default="asc", description="Dirección: asc o desc"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user) ):
+
+    valid_fields = {"id", "study_date", "created_at"}
+    if order_by not in valid_fields:
+        order_by = "id"
+    if order_dir not in {"asc", "desc"}:
+        order_dir = "asc"
+    return radiograph_service.get_radiographs_filtered(
+        db, patient_id, is_hidden, study_date_from, study_date_to,
+        order_by, order_dir, page, page_size
+    )
 
 
 @router.get("/patient/{patient_id}", response_model=list[RadiographResponse])
@@ -62,7 +89,7 @@ def upload_radiograph_image(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-):
+    ):
     allowed_types = {"image/jpeg", "image/png", "image/webp"}
     max_size = 5 * 1024 * 1024
 
@@ -98,7 +125,7 @@ def generate_radiograph_signed_url(
     expires_minutes: int | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-):
+    ):
     if expires_minutes is not None and expires_minutes not in [5, 10]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -118,7 +145,7 @@ def update_radiograph(
     radiograph_data: RadiographUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-):
+    ):
     return radiograph_service.update_radiograph(db, radiograph_id, radiograph_data)
 
 @router.delete("/{radiograph_id}")
@@ -134,7 +161,7 @@ def get_private_radiograph_image(
     radiograph_id: int,
     token: str = Query(...),
     db: Session = Depends(get_db)
-):
+    ):
     image_data = radiograph_service.get_private_image(
         db=db,
         radiograph_id=radiograph_id,

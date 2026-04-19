@@ -58,3 +58,14 @@ class PatientService:
 
         self.repository.delete(db, patient)
         return {"message": "Paciente eliminado correctamente"}
+
+    def get_patients_filtered(self, db: Session, name: str | None, code: str | None, order_by: str, order_dir: str, page: int, page_size: int):
+        results, total = self.repository.get_filtered(
+            db, name, code, order_by, order_dir, page, page_size
+        )
+        return {
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "results": results
+        }

@@ -36,3 +36,9 @@ class RadiographSignedUrlResponse(BaseModel):
     signed_url: str
     token: str
     expires_in_minutes: int
+
+class RadiographListResponse(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    results: list[RadiographResponse]
