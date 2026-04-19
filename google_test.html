@@ -2,24 +2,143 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Google Login Test</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: #1f2937;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 720px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            padding: 32px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 30px;
+            color: #111827;
+        }
+
+        p {
+            margin: 0 0 20px;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .login-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .status {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .token-section {
+            margin-top: 8px;
+        }
+
+        .token-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 120px;
+        }
+
+        .hint {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .success {
+            color: #16a34a;
+        }
+    </style>
 </head>
 <body>
-    <h2>Prueba Google SSO</h2>
+    <div class="card">
+        <div class="badge">Google SSO</div>
+        <h1>Prueba de inicio de sesion</h1>
+        <p>
+            Esta pagina permite autenticar un usuario con Google y mostrar el
+            <strong>ID Token</strong> generado para probar el endpoint
+            <code>/auth/google</code> en Swagger.
+        </p>
 
-    <div id="g_id_onload"
-         data-client_id="868526984931-1mb248ghpljjk3343fbg8jioekae4dla.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse">
+        <div class="login-box">
+            <div id="g_id_onload"
+                 data-client_id="318990624471-v3c1b8q6uuef0a8cfu3ak7oh8oatimr6.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse">
+            </div>
+
+            <div class="g_id_signin" data-type="standard"></div>
+
+            <div id="status" class="status">Esperando inicio de sesion...</div>
+        </div>
+
+        <div class="token-section">
+            <div class="token-title">ID Token generado</div>
+            <pre id="output"></pre>
+            <div class="hint">
+            </div>
+        </div>
     </div>
-
-    <div class="g_id_signin" data-type="standard"></div>
-
-    <pre id="output"></pre>
 
     <script>
         function handleCredentialResponse(response) {
             document.getElementById("output").textContent = response.credential;
+            document.getElementById("status").textContent = "Inicio de sesión completado correctamente.";
+            document.getElementById("status").classList.add("success");
             console.log("ID TOKEN:", response.credential);
         }
     </script>

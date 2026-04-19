@@ -7,6 +7,8 @@ from app.routers import patient_router, radiograph_router, user_router, auth_rou
 app = FastAPI(title="Radiografias API")
 
 scheduler = BackgroundScheduler()
+
+"""
 scheduler.add_job(
     hide_radiographs_daily,
     "cron",
@@ -15,6 +17,16 @@ scheduler.add_job(
     id="hide_radiographs_daily",
     replace_existing=True
 )
+"""
+
+scheduler.add_job(
+    hide_radiographs_daily,
+    "interval",
+    minutes=1,
+    id="hide_radiographs_daily",
+    replace_existing=True
+)
+
 scheduler.start()
 
 
